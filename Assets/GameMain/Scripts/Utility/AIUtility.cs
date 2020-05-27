@@ -1,8 +1,8 @@
 ﻿//------------------------------------------------------------
 // Game Framework
-// Copyright © 2013-2019 Jiang Yin. All rights reserved.
-// Homepage: http://gameframework.cn/
-// Feedback: mailto:jiangyin@gameframework.cn
+// Copyright © 2013-2020 Jiang Yin. All rights reserved.
+// Homepage: https://gameframework.cn/
+// Feedback: mailto:ellan@gameframework.cn
 //------------------------------------------------------------
 
 using System;
@@ -90,6 +90,7 @@ namespace StarForce
                 return result;
             }
 
+            // TODO: GC Alloc
             List<CampType> camps = new List<CampType>();
             Array campTypes = Enum.GetValues(typeof(CampType));
             for (int i = 0; i < campTypes.Length; i++)
@@ -101,6 +102,7 @@ namespace StarForce
                 }
             }
 
+            // TODO: GC Alloc
             result = camps.ToArray();
             s_CampAndRelationToCamps[key] = result;
 

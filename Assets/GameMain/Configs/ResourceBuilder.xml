@@ -1,11 +1,10 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <UnityGameFramework>
-  <AssetBundleBuilder>
+  <ResourceBuilder>
     <Settings>
       <InternalResourceVersion>0</InternalResourceVersion>
       <Platforms>1</Platforms>
       <ZipSelected>True</ZipSelected>
-      <RecordScatteredDependencyAssetsSelected>False</RecordScatteredDependencyAssetsSelected>
       <UncompressedAssetBundleSelected>False</UncompressedAssetBundleSelected>
       <DisableWriteTypeTreeSelected>False</DisableWriteTypeTreeSelected>
       <DeterministicAssetBundleSelected>True</DeterministicAssetBundleSelected>
@@ -19,5 +18,5 @@
       <BuildEventHandlerTypeName>StarForce.Editor.StarForceBuildEventHandler</BuildEventHandlerTypeName>
       <OutputDirectory></OutputDirectory>
     </Settings>
-  </AssetBundleBuilder>
+  </ResourceBuilder>
 </UnityGameFramework>

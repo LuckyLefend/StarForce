@@ -1,8 +1,8 @@
 ﻿//------------------------------------------------------------
 // Game Framework
-// Copyright © 2013-2019 Jiang Yin. All rights reserved.
-// Homepage: http://gameframework.cn/
-// Feedback: mailto:jiangyin@gameframework.cn
+// Copyright © 2013-2020 Jiang Yin. All rights reserved.
+// Homepage: https://gameframework.cn/
+// Feedback: mailto:ellan@gameframework.cn
 //------------------------------------------------------------
 
 using GameFramework.Localization;
@@ -63,16 +63,15 @@ namespace StarForce
             }
 
             Language language = GameEntry.Localization.Language;
-            string languageString = GameEntry.Setting.GetString(Constant.Setting.Language);
-            if (!string.IsNullOrEmpty(languageString))
+            if (GameEntry.Setting.HasSetting(Constant.Setting.Language))
             {
                 try
                 {
+                    string languageString = GameEntry.Setting.GetString(Constant.Setting.Language);
                     language = (Language)Enum.Parse(typeof(Language), languageString);
                 }
                 catch
                 {
-
                 }
             }
 
@@ -107,15 +106,19 @@ namespace StarForce
                 case Language.English:
                     currentVariant = "en-us";
                     break;
+
                 case Language.ChineseSimplified:
                     currentVariant = "zh-cn";
                     break;
+
                 case Language.ChineseTraditional:
                     currentVariant = "zh-tw";
                     break;
+
                 case Language.Korean:
                     currentVariant = "ko-kr";
                     break;
+
                 default:
                     currentVariant = "zh-cn";
                     break;
