@@ -1,6 +1,6 @@
 ﻿//------------------------------------------------------------
 // Game Framework
-// Copyright © 2013-2020 Jiang Yin. All rights reserved.
+// Copyright © 2013-2021 Jiang Yin. All rights reserved.
 // Homepage: https://gameframework.cn/
 // Feedback: mailto:ellan@gameframework.cn
 //------------------------------------------------------------
@@ -70,10 +70,6 @@ namespace StarForce
             }
 
             s_MainFont = mainFont;
-
-            GameObject go = new GameObject();
-            go.AddComponent<Text>().font = mainFont;
-            Destroy(go);
         }
 
 #if UNITY_2017_3_OR_NEWER

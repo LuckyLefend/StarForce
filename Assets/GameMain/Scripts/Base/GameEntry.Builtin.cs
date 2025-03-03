@@ -1,6 +1,6 @@
 ﻿//------------------------------------------------------------
 // Game Framework
-// Copyright © 2013-2020 Jiang Yin. All rights reserved.
+// Copyright © 2013-2021 Jiang Yin. All rights reserved.
 // Homepage: https://gameframework.cn/
 // Feedback: mailto:ellan@gameframework.cn
 //------------------------------------------------------------
@@ -82,6 +82,15 @@ namespace StarForce
         /// 获取事件组件。
         /// </summary>
         public static EventComponent Event
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// 获取文件系统组件。
+        /// </summary>
+        public static FileSystemComponent FileSystem
         {
             get;
             private set;
@@ -196,6 +205,7 @@ namespace StarForce
             Download = UnityGameFramework.Runtime.GameEntry.GetComponent<DownloadComponent>();
             Entity = UnityGameFramework.Runtime.GameEntry.GetComponent<EntityComponent>();
             Event = UnityGameFramework.Runtime.GameEntry.GetComponent<EventComponent>();
+            FileSystem = UnityGameFramework.Runtime.GameEntry.GetComponent<FileSystemComponent>();
             Fsm = UnityGameFramework.Runtime.GameEntry.GetComponent<FsmComponent>();
             Localization = UnityGameFramework.Runtime.GameEntry.GetComponent<LocalizationComponent>();
             Network = UnityGameFramework.Runtime.GameEntry.GetComponent<NetworkComponent>();

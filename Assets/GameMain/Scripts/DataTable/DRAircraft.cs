@@ -1,11 +1,11 @@
 ﻿//------------------------------------------------------------
 // Game Framework
-// Copyright © 2013-2020 Jiang Yin. All rights reserved.
+// Copyright © 2013-2021 Jiang Yin. All rights reserved.
 // Homepage: https://gameframework.cn/
 // Feedback: mailto:ellan@gameframework.cn
 //------------------------------------------------------------
 // 此文件由工具自动生成，请勿直接修改。
-// 生成时间：2020-04-27 17:07:19.120
+// 生成时间：2021-06-16 21:54:35.517
 //------------------------------------------------------------
 
 using GameFramework;
@@ -117,55 +117,49 @@ namespace StarForce
             private set;
         }
 
-        public override bool ParseDataRow(GameFrameworkDataSegment dataRowSegment, object dataTableUserData)
+        public override bool ParseDataRow(string dataRowString, object userData)
         {
-            Type dataType = dataRowSegment.DataType;
-            if (dataType == typeof(string))
+            string[] columnStrings = dataRowString.Split(DataTableExtension.DataSplitSeparators);
+            for (int i = 0; i < columnStrings.Length; i++)
             {
-                string[] columnTexts = ((string)dataRowSegment.Data).Substring(dataRowSegment.Offset, dataRowSegment.Length).Split(DataTableExtension.DataSplitSeparators);
-                for (int i = 0; i < columnTexts.Length; i++)
-                {
-                    columnTexts[i] = columnTexts[i].Trim(DataTableExtension.DataTrimSeparators);
-                }
+                columnStrings[i] = columnStrings[i].Trim(DataTableExtension.DataTrimSeparators);
+            }
 
-                int index = 0;
-                index++;
-                m_Id = int.Parse(columnTexts[index++]);
-                index++;
-                ThrusterId = int.Parse(columnTexts[index++]);
-                WeaponId0 = int.Parse(columnTexts[index++]);
-                WeaponId1 = int.Parse(columnTexts[index++]);
-                WeaponId2 = int.Parse(columnTexts[index++]);
-                ArmorId0 = int.Parse(columnTexts[index++]);
-                ArmorId1 = int.Parse(columnTexts[index++]);
-                ArmorId2 = int.Parse(columnTexts[index++]);
-                DeadEffectId = int.Parse(columnTexts[index++]);
-                DeadSoundId = int.Parse(columnTexts[index++]);
-            }
-            else if (dataType == typeof(byte[]))
+            int index = 0;
+            index++;
+            m_Id = int.Parse(columnStrings[index++]);
+            index++;
+            ThrusterId = int.Parse(columnStrings[index++]);
+            WeaponId0 = int.Parse(columnStrings[index++]);
+            WeaponId1 = int.Parse(columnStrings[index++]);
+            WeaponId2 = int.Parse(columnStrings[index++]);
+            ArmorId0 = int.Parse(columnStrings[index++]);
+            ArmorId1 = int.Parse(columnStrings[index++]);
+            ArmorId2 = int.Parse(columnStrings[index++]);
+            DeadEffectId = int.Parse(columnStrings[index++]);
+            DeadSoundId = int.Parse(columnStrings[index++]);
+
+            GeneratePropertyArray();
+            return true;
+        }
+
+        public override bool ParseDataRow(byte[] dataRowBytes, int startIndex, int length, object userData)
+        {
+            using (MemoryStream memoryStream = new MemoryStream(dataRowBytes, startIndex, length, false))
             {
-                string[] strings = (string[])dataTableUserData;
-                using (MemoryStream memoryStream = new MemoryStream((byte[])dataRowSegment.Data, dataRowSegment.Offset, dataRowSegment.Length, false))
+                using (BinaryReader binaryReader = new BinaryReader(memoryStream, Encoding.UTF8))
                 {
-                    using (BinaryReader binaryReader = new BinaryReader(memoryStream, Encoding.UTF8))
-                    {
-                        m_Id = binaryReader.Read7BitEncodedInt32();
-                        ThrusterId = binaryReader.Read7BitEncodedInt32();
-                        WeaponId0 = binaryReader.Read7BitEncodedInt32();
-                        WeaponId1 = binaryReader.Read7BitEncodedInt32();
-                        WeaponId2 = binaryReader.Read7BitEncodedInt32();
-                        ArmorId0 = binaryReader.Read7BitEncodedInt32();
-                        ArmorId1 = binaryReader.Read7BitEncodedInt32();
-                        ArmorId2 = binaryReader.Read7BitEncodedInt32();
-                        DeadEffectId = binaryReader.Read7BitEncodedInt32();
-                        DeadSoundId = binaryReader.Read7BitEncodedInt32();
-                    }
+                    m_Id = binaryReader.Read7BitEncodedInt32();
+                    ThrusterId = binaryReader.Read7BitEncodedInt32();
+                    WeaponId0 = binaryReader.Read7BitEncodedInt32();
+                    WeaponId1 = binaryReader.Read7BitEncodedInt32();
+                    WeaponId2 = binaryReader.Read7BitEncodedInt32();
+                    ArmorId0 = binaryReader.Read7BitEncodedInt32();
+                    ArmorId1 = binaryReader.Read7BitEncodedInt32();
+                    ArmorId2 = binaryReader.Read7BitEncodedInt32();
+                    DeadEffectId = binaryReader.Read7BitEncodedInt32();
+                    DeadSoundId = binaryReader.Read7BitEncodedInt32();
                 }
-            }
-            else
-            {
-                Log.Warning("Can not parse data row which type '{0}' is invalid.", dataType.FullName);
-                return false;
             }
 
             GeneratePropertyArray();
@@ -192,14 +186,14 @@ namespace StarForce
                 }
             }
 
-            throw new GameFrameworkException(Utility.Text.Format("GetWeaponId with invalid id '{0}'.", id.ToString()));
+            throw new GameFrameworkException(Utility.Text.Format("GetWeaponId with invalid id '{0}'.", id));
         }
 
         public int GetWeaponIdAt(int index)
         {
             if (index < 0 || index >= m_WeaponId.Length)
             {
-                throw new GameFrameworkException(Utility.Text.Format("GetWeaponIdAt with invalid index '{0}'.", index.ToString()));
+                throw new GameFrameworkException(Utility.Text.Format("GetWeaponIdAt with invalid index '{0}'.", index));
             }
 
             return m_WeaponId[index].Value;
@@ -225,14 +219,14 @@ namespace StarForce
                 }
             }
 
-            throw new GameFrameworkException(Utility.Text.Format("GetArmorId with invalid id '{0}'.", id.ToString()));
+            throw new GameFrameworkException(Utility.Text.Format("GetArmorId with invalid id '{0}'.", id));
         }
 
         public int GetArmorIdAt(int index)
         {
             if (index < 0 || index >= m_ArmorId.Length)
             {
-                throw new GameFrameworkException(Utility.Text.Format("GetArmorIdAt with invalid index '{0}'.", index.ToString()));
+                throw new GameFrameworkException(Utility.Text.Format("GetArmorIdAt with invalid index '{0}'.", index));
             }
 
             return m_ArmorId[index].Value;

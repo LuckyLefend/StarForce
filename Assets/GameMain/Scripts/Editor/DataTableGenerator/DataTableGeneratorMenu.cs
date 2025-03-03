@@ -1,6 +1,6 @@
 ﻿//------------------------------------------------------------
 // Game Framework
-// Copyright © 2013-2020 Jiang Yin. All rights reserved.
+// Copyright © 2013-2021 Jiang Yin. All rights reserved.
 // Homepage: https://gameframework.cn/
 // Feedback: mailto:ellan@gameframework.cn
 //------------------------------------------------------------
@@ -8,7 +8,6 @@
 using GameFramework;
 using UnityEditor;
 using UnityEngine;
-using UnityGameFramework.Editor.DataTableTools;
 
 namespace StarForce.Editor.DataTableTools
 {

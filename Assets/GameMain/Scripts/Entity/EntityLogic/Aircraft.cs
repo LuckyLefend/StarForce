@@ -1,6 +1,6 @@
 ﻿//------------------------------------------------------------
 // Game Framework
-// Copyright © 2013-2020 Jiang Yin. All rights reserved.
+// Copyright © 2013-2021 Jiang Yin. All rights reserved.
 // Homepage: https://gameframework.cn/
 // Feedback: mailto:ellan@gameframework.cn
 //------------------------------------------------------------
@@ -44,7 +44,7 @@ namespace StarForce
                 return;
             }
 
-            Name = Utility.Text.Format("Aircraft ({0})", Id.ToString());
+            Name = Utility.Text.Format("Aircraft ({0})", Id);
 
             GameEntry.Entity.ShowThruster(m_AircraftData.GetThrusterData());
 

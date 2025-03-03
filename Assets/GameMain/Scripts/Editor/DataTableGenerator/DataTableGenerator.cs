@@ -1,6 +1,6 @@
 ﻿//------------------------------------------------------------
 // Game Framework
-// Copyright © 2013-2020 Jiang Yin. All rights reserved.
+// Copyright © 2013-2021 Jiang Yin. All rights reserved.
 // Homepage: https://gameframework.cn/
 // Feedback: mailto:ellan@gameframework.cn
 //------------------------------------------------------------
@@ -12,7 +12,6 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using UnityEngine;
-using UnityGameFramework.Editor.DataTableTools;
 
 namespace StarForce.Editor.DataTableTools
 {
@@ -74,7 +73,7 @@ namespace StarForce.Editor.DataTableTools
         {
             string dataTableName = (string)userData;
 
-            codeContent.Replace("__DATA_TABLE_CREATE_TIME__", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"));
+            codeContent.Replace("__DATA_TABLE_CREATE_TIME__", DateTime.UtcNow.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss.fff"));
             codeContent.Replace("__DATA_TABLE_NAME_SPACE__", "StarForce");
             codeContent.Replace("__DATA_TABLE_CLASS_NAME__", "DR" + dataTableName);
             codeContent.Replace("__DATA_TABLE_COMMENT__", dataTableProcessor.GetValue(0, 1) + "。");
@@ -129,32 +128,29 @@ namespace StarForce.Editor.DataTableTools
         {
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder
-                .AppendLine("        public override bool ParseDataRow(GameFrameworkDataSegment dataRowSegment, object dataTableUserData)")
+                .AppendLine("        public override bool ParseDataRow(string dataRowString, object userData)")
                 .AppendLine("        {")
-                .AppendLine("            Type dataType = dataRowSegment.DataType;")
-                .AppendLine("            if (dataType == typeof(string))")
+                .AppendLine("            string[] columnStrings = dataRowString.Split(DataTableExtension.DataSplitSeparators);")
+                .AppendLine("            for (int i = 0; i < columnStrings.Length; i++)")
                 .AppendLine("            {")
-                .AppendLine("                string[] columnTexts = ((string)dataRowSegment.Data).Substring(dataRowSegment.Offset, dataRowSegment.Length).Split(DataTableExtension.DataSplitSeparators);")
-                .AppendLine("                for (int i = 0; i < columnTexts.Length; i++)")
-                .AppendLine("                {")
-                .AppendLine("                    columnTexts[i] = columnTexts[i].Trim(DataTableExtension.DataTrimSeparators);")
-                .AppendLine("                }")
+                .AppendLine("                columnStrings[i] = columnStrings[i].Trim(DataTableExtension.DataTrimSeparators);")
+                .AppendLine("            }")
                 .AppendLine()
-                .AppendLine("                int index = 0;");
+                .AppendLine("            int index = 0;");
 
             for (int i = 0; i < dataTableProcessor.RawColumnCount; i++)
             {
                 if (dataTableProcessor.IsCommentColumn(i))
                 {
                     // 注释列
-                    stringBuilder.AppendLine("                index++;");
+                    stringBuilder.AppendLine("            index++;");
                     continue;
                 }
 
                 if (dataTableProcessor.IsIdColumn(i))
                 {
                     // 编号列
-                    stringBuilder.AppendLine("                m_Id = int.Parse(columnTexts[index++]);");
+                    stringBuilder.AppendLine("            m_Id = int.Parse(columnStrings[index++]);");
                     continue;
                 }
 
@@ -163,28 +159,30 @@ namespace StarForce.Editor.DataTableTools
                     string languageKeyword = dataTableProcessor.GetLanguageKeyword(i);
                     if (languageKeyword == "string")
                     {
-                        stringBuilder.AppendFormat("                {0} = columnTexts[index++];", dataTableProcessor.GetName(i)).AppendLine();
+                        stringBuilder.AppendFormat("            {0} = columnStrings[index++];", dataTableProcessor.GetName(i)).AppendLine();
                     }
                     else
                     {
-                        stringBuilder.AppendFormat("                {0} = {1}.Parse(columnTexts[index++]);", dataTableProcessor.GetName(i), languageKeyword).AppendLine();
+                        stringBuilder.AppendFormat("            {0} = {1}.Parse(columnStrings[index++]);", dataTableProcessor.GetName(i), languageKeyword).AppendLine();
                     }
                 }
                 else
                 {
-                    stringBuilder.AppendFormat("                {0} = DataTableExtension.Parse{1}(columnTexts[index++]);", dataTableProcessor.GetName(i), dataTableProcessor.GetType(i).Name).AppendLine();
+                    stringBuilder.AppendFormat("            {0} = DataTableExtension.Parse{1}(columnStrings[index++]);", dataTableProcessor.GetName(i), dataTableProcessor.GetType(i).Name).AppendLine();
                 }
             }
 
-            stringBuilder
-                .AppendLine("            }")
-                .AppendLine("            else if (dataType == typeof(byte[]))")
+            stringBuilder.AppendLine()
+                .AppendLine("            GeneratePropertyArray();")
+                .AppendLine("            return true;")
+                .AppendLine("        }")
+                .AppendLine()
+                .AppendLine("        public override bool ParseDataRow(byte[] dataRowBytes, int startIndex, int length, object userData)")
+                .AppendLine("        {")
+                .AppendLine("            using (MemoryStream memoryStream = new MemoryStream(dataRowBytes, startIndex, length, false))")
                 .AppendLine("            {")
-                .AppendLine("                string[] strings = (string[])dataTableUserData;")
-                .AppendLine("                using (MemoryStream memoryStream = new MemoryStream((byte[])dataRowSegment.Data, dataRowSegment.Offset, dataRowSegment.Length, false))")
-                .AppendLine("                {")
-                .AppendLine("                    using (BinaryReader binaryReader = new BinaryReader(memoryStream, Encoding.UTF8))")
-                .AppendLine("                    {");
+                .AppendLine("                using (BinaryReader binaryReader = new BinaryReader(memoryStream, Encoding.UTF8))")
+                .AppendLine("                {");
 
             for (int i = 0; i < dataTableProcessor.RawColumnCount; i++)
             {
@@ -197,33 +195,23 @@ namespace StarForce.Editor.DataTableTools
                 if (dataTableProcessor.IsIdColumn(i))
                 {
                     // 编号列
-                    stringBuilder.AppendLine("                        m_Id = binaryReader.Read7BitEncodedInt32();");
+                    stringBuilder.AppendLine("                    m_Id = binaryReader.Read7BitEncodedInt32();");
                     continue;
                 }
 
                 string languageKeyword = dataTableProcessor.GetLanguageKeyword(i);
                 if (languageKeyword == "int" || languageKeyword == "uint" || languageKeyword == "long" || languageKeyword == "ulong")
                 {
-                    stringBuilder.AppendFormat("                        {0} = binaryReader.Read7BitEncoded{1}();", dataTableProcessor.GetName(i), dataTableProcessor.GetType(i).Name).AppendLine();
-                }
-                else if (languageKeyword == "string")
-                {
-                    stringBuilder.AppendFormat("                        {0} = strings[binaryReader.Read7BitEncodedInt32()];", dataTableProcessor.GetName(i)).AppendLine();
+                    stringBuilder.AppendFormat("                    {0} = binaryReader.Read7BitEncoded{1}();", dataTableProcessor.GetName(i), dataTableProcessor.GetType(i).Name).AppendLine();
                 }
                 else
                 {
-                    stringBuilder.AppendFormat("                        {0} = binaryReader.Read{1}();", dataTableProcessor.GetName(i), dataTableProcessor.GetType(i).Name).AppendLine();
+                    stringBuilder.AppendFormat("                    {0} = binaryReader.Read{1}();", dataTableProcessor.GetName(i), dataTableProcessor.GetType(i).Name).AppendLine();
                 }
             }
 
             stringBuilder
-                .AppendLine("                    }")
                 .AppendLine("                }")
-                .AppendLine("            }")
-                .AppendLine("            else")
-                .AppendLine("            {")
-                .AppendLine("                Log.Warning(\"Can not parse data row which type '{0}' is invalid.\", dataType.FullName);")
-                .AppendLine("                return false;")
                 .AppendLine("            }")
                 .AppendLine()
                 .AppendLine("            GeneratePropertyArray();")
@@ -312,14 +300,14 @@ namespace StarForce.Editor.DataTableTools
                     .AppendLine("                }")
                     .AppendLine("            }")
                     .AppendLine()
-                    .AppendFormat("            throw new GameFrameworkException(Utility.Text.Format(\"Get{0} with invalid id '{{0}}'.\", id.ToString()));", propertyCollection.Name).AppendLine()
+                    .AppendFormat("            throw new GameFrameworkException(Utility.Text.Format(\"Get{0} with invalid id '{{0}}'.\", id));", propertyCollection.Name).AppendLine()
                     .AppendLine("        }")
                     .AppendLine()
                     .AppendFormat("        public {1} Get{0}At(int index)", propertyCollection.Name, propertyCollection.LanguageKeyword).AppendLine()
                     .AppendLine("        {")
                     .AppendFormat("            if (index < 0 || index >= m_{0}.Length)", propertyCollection.Name).AppendLine()
                     .AppendLine("            {")
-                    .AppendFormat("                throw new GameFrameworkException(Utility.Text.Format(\"Get{0}At with invalid index '{{0}}'.\", index.ToString()));", propertyCollection.Name).AppendLine()
+                    .AppendFormat("                throw new GameFrameworkException(Utility.Text.Format(\"Get{0}At with invalid index '{{0}}'.\", index));", propertyCollection.Name).AppendLine()
                     .AppendLine("            }")
                     .AppendLine()
                     .AppendFormat("            return m_{0}[index].Value;", propertyCollection.Name).AppendLine()
@@ -409,7 +397,7 @@ namespace StarForce.Editor.DataTableTools
             {
                 if (index < 0 || index >= m_Items.Count)
                 {
-                    throw new GameFrameworkException(Utility.Text.Format("GetItem with invalid index '{0}'.", index.ToString()));
+                    throw new GameFrameworkException(Utility.Text.Format("GetItem with invalid index '{0}'.", index));
                 }
 
                 return m_Items[index];
